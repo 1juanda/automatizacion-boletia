@@ -1,54 +1,55 @@
-name: building-and-deployment
+name: Run Tests
 
 on:
   push:
     branches:
       - main
-env:
-  project_name: "automatizacion-boletia"
-  language: "java"
-  java-version: "18"
-  java-distribution: "adopt"
-
+  pull_request:
+    branches:
+      - main
+  #schedule:
+    #- cron: "30 20 * * Mon"
+  workflow_dispatch:
 jobs:
   integration-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up JDK 18
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ env.java-version }}
-          distribution: ${{ env.java-distribution }}
-      - name: Install dependencies
-        env:
-          ARTIFACTORY_READER_USER: ${{secrets.ARTIFACTORY_READER_USER}}
-          ARTIFACTORY_READER_API_KEY: ${{secrets.ARTIFACTORY_READER_API_KEY}}
-        run: mvn clean install -DskipTests
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}-v1
-      - name: Execute Tests
-        env:
-          ARTIFACTORY_READER_USER: ${{ secrets.ARTIFACTORY_READER_USER }}
-          ARTIFACTORY_READER_API_KEY: ${{ secrets.ARTIFACTORY_READER_API_KEY }}
-        run: mvn test -P boletia
-      - name: ZAP Scan
-        uses: zaproxy/action-baseline@v0.13.0
-        with:
-          target: 'https://maximus-cupones.plupets.com/'
-      - name: Upload artifactory report
-        uses: actions/upload-artifact@v2
-        with:
+    - name: Check out the code
+      uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: 'adopt'
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven
+    - name: Install dependencies
+      run: mvn clean install -DskipTests
+    - name: Run Selenium tests
+      run: mvn test
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
           name: reports
           path: |
             reports/
             screen/
-      - name: Persist Data
-        uses: actions/upload-artifact@v2
-        with:
-          name: target
-          path: target
           retention-days: 1
+    - name: Run OWASP ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.4.0
+      with:
+        target: "https://maximus-cupones.plupets.com/"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload OWASP ZAP report
+      uses: actions/upload-artifact@v3
+      with:
+        name: zap-report
+        path: owasp-zap-report.html
+        retention-days: 1
