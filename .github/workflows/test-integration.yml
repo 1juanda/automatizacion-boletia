@@ -48,12 +48,11 @@ jobs:
       uses: zaproxy/action-baseline@v0.13.0
       with:
         target: 'https://maximus-cupones.plupets.com/'
-        report: 'owasp-zap-report.html'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload OWASP ZAP report
-      uses: actions/upload-artifact@v3
+        artifact_name: security_reports
+        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Restore security report
+      if: always()
+      uses: actions/download-artifact@v3
       with:
-        name: owasp-zap-report
-        path: owasp-zap-report.html
-        retention-days: 1
+        name: security_reports
+        path: automatizacion-boletia/security-reports
