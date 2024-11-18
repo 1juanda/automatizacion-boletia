@@ -41,15 +41,14 @@ jobs:
             reports/
             screen/
           retention-days: 1
-    - name: Run OWASP ZAP Baseline Scan
-      uses: zaproxy/action-baseline@v0.4.0
+    - name: ZAP Scan
+      uses: zaproxy/action-baseline@v0.13.0
       with:
-        target: "https://maximus-cupones.plupets.com/"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        target: 'https://maximus-cupones.plupets.com/'
+        report: 'owasp-zap-report.html'
     - name: Upload OWASP ZAP report
       uses: actions/upload-artifact@v3
       with:
-        name: zap-report
+        name: owasp-zap-report
         path: owasp-zap-report.html
         retention-days: 1
