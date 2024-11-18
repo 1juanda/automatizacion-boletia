@@ -46,6 +46,8 @@ jobs:
       with:
         target: 'https://maximus-cupones.plupets.com/'
         report: 'owasp-zap-report.html'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload OWASP ZAP report
       uses: actions/upload-artifact@v3
       with:
