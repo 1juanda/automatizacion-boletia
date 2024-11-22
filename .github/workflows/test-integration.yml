@@ -44,15 +44,3 @@ jobs:
             reports/
             screen/
           retention-days: 1
-    - name: ZAP Scan
-      uses: zaproxy/action-baseline@v0.13.0
-      with:
-        target: 'https://maximus-cupones.plupets.com/'
-        artifact_name: security_reports
-        token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Restore security report
-      if: always()
-      uses: actions/download-artifact@v3
-      with:
-        name: security_reports
-        path: automatizacion-boletia/security-reports
