@@ -23,6 +23,7 @@ jobs:
         target: 'https://maximus-cupones.plupets.com/'
         artifact_name: security_reports
         token: ${{ secrets.GITHUB_TOKEN }}
+        allow_issue_writing: false
     - name: Restore security report
       if: always()
       uses: actions/download-artifact@v3
