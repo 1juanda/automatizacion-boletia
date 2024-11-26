@@ -34,7 +34,7 @@ jobs:
     - name: Install dependencies
       run: mvn clean install -DskipTests
     - name: Run Selenium tests
-      run: mvn test
+      run: mvn test -P RunTest
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v3
